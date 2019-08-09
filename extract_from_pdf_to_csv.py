@@ -34,24 +34,32 @@ def read_pdf_to_csv(filename):
                         df.loc[k + 1].values[i] = df.loc[k].values[i]
 
         for i in range(len(df.loc[count - 1])):
+            if type(df.loc[count - 1].values[i]) != type("as"):
+                continue
             if df.loc[count - 1].values[i].endswith('%'):
                 df.loc[count - 1].values[i] = df.loc[count - 1].values[i][:-1] + "%"
 
 #修改标题头
         title = list(df.loc[count - 1])
         for i in range(len(df.columns)):
+            if type(df.columns[i].startswith('U')) != type("as"):
+                continue;
             if not df.columns[i].startswith('U'):
                 title[i] = df.columns[i] + title[i]
 
         new_title = []
+        title_find = 0
         for i in range(len(title)):
+            if type(title[i]) != type("as"):
+                title_find = 1
+                continue
             if title[i].find(' '):
                 st = title[i].split(' ')
                 new_title.append("".join(st))
             else:
                 new_title.append(title[i])
-    
-        df.columns = new_title
+        if title_find == 0:
+            df.columns = new_title
         df = df[count:]
         index = [i for i in range(len(df))]
         df.index = index
@@ -70,7 +78,7 @@ def file_name(file_dir):
                 names.append(os.path.join(root, file))
     return names
 
-files = file_name("/Users/yulei/chengdu") #这里是文件夹的名字
+files = file_name("/Users/yulei/chengdu/crawGovData/data/成都/成都市2018年财政预算执行情况和2019年财政预算草案的报告及相关预算报表/") #这里是文件夹的名字
 for file in files:
     print(file)
     read_pdf_to_csv(file)

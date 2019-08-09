@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time    : 18/6/16 下午16:41
-# @Author  : Lihailin<415787837@qq.com>
-# @Desc    : 爬取大庆政府网站文件
-# @File    : crawDaqingGov.py
+# @Time    : 08/06/2019
+# @Author  : Yuhong Zhai
+# @Desc    : 爬取成都政府网站文件-第一页
+# @File    : crawChengDuGov.py
 # @Software: PyCharm
 from lxml import etree
 import crawBase
@@ -25,11 +25,13 @@ class CrawDaqingGov(crawBase.CrawBase):
         super(CrawDaqingGov, self).__init__()
 
 
-    def getFile(self, url, path_):
-        if not os.path.exists(path_):
+    def getFile(self, url, path_): #下载文件
+        
+        if not os.path.exists(path_): #如果文件目录不存在，建立目录
             os.makedirs(path_)
-        file_name = path_ + url.split('/')[-1]
-        u = urlopen(url)
+    
+        file_name = path_ + url.split('/')[-1]  #得到文件名
+        u = urlopen(url)    
         f = open(file_name, 'wb')
         block_sz = 8192
         while True:
@@ -38,6 +40,7 @@ class CrawDaqingGov(crawBase.CrawBase):
                 break
             f.write(buffer)
         f.close()
+        #上面是传输文件
         print ("Sucessful to download" + " " + file_name)
 
     def firstHasNextPage(self, url):
@@ -105,6 +108,7 @@ class CrawDaqingGov(crawBase.CrawBase):
                 return g
 
     def getUsefulInfo(self, url, dic):
+        #下载网页下的多个pdf文件
         '''
         访问url,并下载网页,并解析得到需要的文件
         :param url:
@@ -113,12 +117,14 @@ class CrawDaqingGov(crawBase.CrawBase):
         c = self.get(url)
         html = etree.HTML(c)
         title = html.xpath('/html/head/meta[@name="ArticleTitle"]/@content')[0]
+        #得到title,作为子目录的目录名
 #        pdf = html.xpath('//p/span/a/@href')
         allref = html.xpath('//@href')
         pdfs = []
         for item in allref:
             if item.find(".pdf") > 0 or item.find(".xlsx") > 0:
                 pdfs.append(item)
+        #得到所有的pdf和xlsx文件的路径
 #        print(pdfs)
         for pdf in pdfs:
  #           print(pdf)
@@ -134,7 +140,8 @@ class CrawDaqingGov(crawBase.CrawBase):
                 else:
                     tl[1] = pdf
                 url_ = "/".join(tl)
-            self.getFile(url_, dic + title + "/")
+            #通过文件的路径得到文件的完整网址
+            self.getFile(url_, dic + title + "/") #下载文件
 
 #            url_ = url + pdf
 #            print(url_)
@@ -210,13 +217,14 @@ class CrawDaqingGov(crawBase.CrawBase):
         os.system('mkdir -p %s' % dic)
         i = 2
         while True:
-            secUrls = self.firstPage(url)
+            secUrls = self.firstPage(url) #得到一级域名下的各个二级域名的链接
  #           print(secUrls) #得到二级域名
  #           print(" ")
             # print(len(secUrls))
-            for secUrl in secUrls:
+            for secUrl in secUrls: #对于每一个二级域名/网页
                 if '' == secUrl:
                     continue
+                #调用getUsefulInfo函数，下载其下面的各个PDF
                 thirdUrl, r, xxmc, fbrq, wh, nr, fbbm1 = self.getUsefulInfo(secUrl,dic)
                 #得到三级域名
 
@@ -234,7 +242,7 @@ class CrawDaqingGov(crawBase.CrawBase):
             else:
                 break
 
-if __name__ == '__main__':
+if __name__ == '__main__': #主程序部分
     firstUri = 'http://cdcz.chengdu.gov.cn/cdsczj/c116720/list2.shtml'
     infoUri = 'http://cdcz.chengdu.gov.cn/cdsczj/c116720/list2.shtml'
     t = CrawDaqingGov()
@@ -247,5 +255,5 @@ if __name__ == '__main__':
     # t.run(url, 'data/大庆/市政府文件', '大庆市人民政府')  # 市政府文件
     # url = 'http://www.daqing.gov.cn/zfgw/szfbwj/'
     # t.run(url, 'data/大庆/市政府办文件', '大庆市人民政府办公室')  # 市政府办文件
-    url = 'http://cdcz.chengdu.gov.cn/cdsczj/c116720/list2.shtml'
-    t.run(url, 'data/成都/')  # 部门文件
+    url = 'http://cdcz.chengdu.gov.cn/cdsczj/c116720/list2.shtml' #爬取的一级网址
+    t.run(url, 'data/成都/')  #第二个参数是存储的目录
