@@ -24,12 +24,30 @@ class CrawDaqingGov(crawBase.CrawBase):
     def __init__(self):
         super(CrawDaqingGov, self).__init__()
 
-
-    def getFile(self, url, path_):
+    def getFile1(self, url, path_, title):
         if not os.path.exists(path_):
             os.makedirs(path_)
+
+        file_name = path_ + title + ".pdf"
+        u = urlopen(url)
+
+        f = open(file_name, 'wb')
+        block_sz = 8192
+        while True:
+            buffer = u.read(block_sz)
+            if not buffer:
+                break
+            f.write(buffer)
+        f.close()
+        print ("Sucessful to download" + " " + file_name)
+
+    def getFile(self, url, path_, title):
+        if not os.path.exists(path_):
+            os.makedirs(path_)
+
         file_name = path_ + url.split('/')[-1]
         u = urlopen(url)
+
         f = open(file_name, 'wb')
         block_sz = 8192
         while True:
@@ -134,7 +152,10 @@ class CrawDaqingGov(crawBase.CrawBase):
                 else:
                     tl[1] = pdf
                 url_ = "/".join(tl)
-            self.getFile(url_, dic + title + "/")
+            if len(pdfs) > 1:
+            	self.getFile(url_, dic + title + "/", title)
+            	continue
+            self.getFile1(url_, dic + title + "/", title)
 
 #            url_ = url + pdf
 #            print(url_)
@@ -235,9 +256,11 @@ class CrawDaqingGov(crawBase.CrawBase):
                 break
 
 if __name__ == '__main__':
-    firstUri = 'http://cdcz.chengdu.gov.cn/cdsczj/c116720/list2.shtml'
-    infoUri = 'http://cdcz.chengdu.gov.cn/cdsczj/c116720/list2.shtml'
+#   firstUri = 'http://cdcz.chengdu.gov.cn/cdsczj/c116720/list2.shtml'
+#    infoUri = 'http://cdcz.chengdu.gov.cn/cdsczj/c116720/list2.shtml'
     t = CrawDaqingGov()
+    url1 = 'http://cdcz.chengdu.gov.cn/cdsczj/c116720/list2.shtml'
+    t.run(url1, 'data/首页/')  # 部门文件
     # print(t.get('http://www.daqing.gov.cn/zfgw/szfwj/index_2.shtml'))
     # t.firstGenPageUrl(firstUri, 4)
     # t.firstPage(firstUri)
@@ -247,5 +270,9 @@ if __name__ == '__main__':
     # t.run(url, 'data/大庆/市政府文件', '大庆市人民政府')  # 市政府文件
     # url = 'http://www.daqing.gov.cn/zfgw/szfbwj/'
     # t.run(url, 'data/大庆/市政府办文件', '大庆市人民政府办公室')  # 市政府办文件
-    url = 'http://cdcz.chengdu.gov.cn/cdsczj/c116720/list2.shtml'
-    t.run(url, 'data/成都/')  # 部门文件
+'''
+    url0 = 'http://cdcz.chengdu.gov.cn/cdsczj/c116720/list2_'
+    for i in range(10, 11):
+    	url1 = url0 + str(i) + '.shtml'
+    	t.run(url1, 'data/成都/')  # 部门文件
+'''
